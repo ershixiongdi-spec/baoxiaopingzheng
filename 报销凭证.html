@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>报账凭证</title>
+<style>
+  @page { size: 239mm 117mm; margin: 0; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #c0c0c0;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 10px 80px; gap: 12px;
+    font-family: "SimSun","宋体",serif;
+    min-height: 100vh;
+  }
+
+  /* 外层缩放容器（仅屏幕） */
+  .voucher-stage {
+    transform: scale(1.20);
+    transform-origin: top center;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+
+  .voucher {
+    width: 239mm; height: 117mm;
+    position: relative; background: #fff;
+    box-shadow: 0 2px 16px rgba(0,0,0,.22);
+    overflow: hidden;
+  }
+
+  .voucher .bg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    opacity: 0.40;
+    z-index: 0;
+  }
+
+  /* ---- 输入控件 ---- */
+  .voucher input, .voucher select {
+    position: absolute; border: none; outline: none;
+    font-family: "SimSun","宋体",serif;
+    text-align: center; color: #111; padding: 0;
+    z-index: 2;
+    background: rgba(200,200,200,0.35);
+    transition: background 0.12s;
+    font-size: 11px;         /* 放大 */
+    height: 3.8mm;           /* 放大（原2.5mm） */
+  }
+  .voucher input:focus, .voucher select:focus {
+    background: rgba(80,160,255,0.40);
+    box-shadow: 0 0 0 1.5px #1677ff;
+  }
+  .voucher input.left { text-align: left; padding-left: 1mm; }
+
+  /* ---- 打印展示文字 ---- */
+  .voucher .print-text {
+    position: absolute; z-index: 1;
+    font-family: "SimSun","宋体",serif;
+    font-size: 12px; color: #000;
+    text-align: center; overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+    display: none;           /* 录入时隐藏 */
+  }
+
+  /* =============================================
+     坐标 (mm) = px * 239/2823 (及 y: px * 117/1382)
+     ============================================= */
+
+  #certNo      { left:203.2mm; top:17.4mm; width:8.4mm; }
+  #attachCount { left:204.8mm; top:26.8mm; width:5.1mm; }
+  #unitName    { left:41.6mm; top:25.8mm; width:25.4mm; }
+  #year        { left:90.2mm; top:26.3mm; width:7.1mm; }
+  #month       { left:107.1mm;top:26.3mm; width:3.7mm; }
+  #day         { left:123.5mm;top:26.3mm; width:3.7mm; }
+
+  .r1-sum {left:25.0mm; top:53.1mm; width:29.4mm;}
+  .r1-s1  {left:76.3mm; top:53.1mm; width:15.2mm;}
+  .r1-s2  {left:100.6mm;top:53.5mm; width:15.2mm;}
+  .r1-s3  {left:125.9mm;top:53.8mm; width:15.2mm;}
+  .r1-s4  {left:150.9mm;top:54.2mm; width:15.2mm;}
+  .r1-in  {left:174.9mm;top:53.9mm; width:19.2mm;}
+  .r1-out {left:198.8mm;top:53.5mm; width:19.2mm;}
+
+  .r2-sum {left:25.0mm; top:62.8mm; width:29.4mm;}
+  .r2-s1  {left:76.4mm; top:63.0mm; width:15.2mm;}
+  .r2-s2  {left:100.9mm;top:62.7mm; width:15.2mm;}
+  .r2-s3  {left:126.0mm;top:62.2mm; width:15.2mm;}
+  .r2-s4  {left:151.2mm;top:62.2mm; width:15.2mm;}
+  .r2-in  {left:174.9mm;top:62.5mm; width:19.2mm;}
+  .r2-out {left:198.8mm;top:62.4mm; width:19.2mm;}
+
+  .r3-sum {left:25.1mm; top:72.0mm; width:29.4mm;}
+  .r3-s1  {left:76.3mm; top:72.0mm; width:15.2mm;}
+  .r3-s2  {left:101.0mm;top:71.5mm; width:15.2mm;}
+  .r3-s3  {left:126.3mm;top:71.7mm; width:15.2mm;}
+  .r3-s4  {left:151.4mm;top:71.2mm; width:15.2mm;}
+  .r3-in  {left:175.1mm;top:71.1mm; width:19.2mm;}
+  .r3-out {left:198.8mm;top:71.1mm; width:19.2mm;}
+
+  #bankName    { left:48.0mm; top:80.2mm; width:42.3mm; }
+  #bankBranch  { left:47.9mm; top:85.5mm; width:42.3mm; }
+  #bankAccount { left:47.8mm; top:90.9mm; width:42.3mm; }
+
+  #cap_qw { left:55.0mm; top:99.9mm; width:6.8mm; }
+  #cap_bw { left:71.7mm; top:99.9mm; width:6.8mm; }
+  #cap_sw { left:87.4mm; top:99.8mm; width:6.8mm; }
+  #cap_w  { left:104.2mm;top:100.1mm;width:6.8mm; }
+  #cap_q  { left:121.4mm;top:100.1mm;width:6.8mm; }
+  #cap_b  { left:138.0mm;top:99.8mm; width:6.8mm; }
+  #cap_s  { left:154.7mm;top:100.1mm;width:6.8mm; }
+  #cap_y  { left:171.4mm;top:99.9mm; width:6.8mm; }
+  #cap_j  { left:188.1mm;top:100.1mm;width:6.8mm; }
+  #cap_f  { left:205.4mm;top:100.1mm;width:6.8mm; }
+
+  #signFinance  { left:47.0mm; top:109.3mm; width:17mm; }
+  #signReporter { left:87.8mm; top:109.3mm; width:12.7mm; }
+  #signCashier  { left:140mm;  top:109.3mm; width:17mm; }
+  #signPayee    { left:195mm;  top:109.3mm; width:17mm; }
+
+  /* 银行按钮 */
+  .bank-btn {
+    position: absolute; left: 93mm; top: 80.2mm;
+    font-size: 8px; color: #1677ff; cursor: pointer; z-index: 10;
+    background: rgba(255,255,255,0.85); border: 1px solid #1677ff;
+    border-radius: 2px; padding: 0 4px; height: 3.8mm; line-height: 3.8mm;
+  }
+  .bank-btn:hover { background: #e6f4ff; }
+  .bank-dd {
+    position: absolute; left: 48mm; top: 84mm;
+    background: #fff; border: 1px solid #ccc; border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    z-index: 200; min-width: 180px; max-height: 120px; overflow-y: auto;
+    display: none; font-size: 9px;
+  }
+  .bank-dd .item {
+    padding: 3px 8px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .bank-dd .item:hover { background: #f5f5f5; }
+  .bank-dd .item .del { color: #ff4d4f; padding: 0 4px; cursor: pointer; }
+  .bank-dd .item .del:hover { color: #ff7875; }
+
+  /* 按钮 */
+  .btn-bar {
+    display: flex; flex-direction: column; gap: 8px;
+    position: fixed; top: 20px; right: 20px;
+    z-index: 500; pointer-events: auto;
+  }
+  .btn {
+    padding: 7px 22px; font-size: 14px; border-radius: 4px;
+    cursor: pointer; border: none; transition: all .2s;
+    font-family: "Microsoft YaHei", sans-serif; pointer-events: auto;
+  }
+  .btn-preview { background: #52c41a; color: #fff; }
+  .btn-preview:hover { background: #73d13d; }
+  .btn-print { background: #1677ff; color: #fff; }
+  .btn-print:hover { background: #4096ff; }
+  .btn-clear { background: #fff; color: #555; border: 1px solid #ccc; }
+  .btn-clear:hover { border-color: #1677ff; color: #1677ff; }
+
+  /* 预览弹窗 */
+  .preview-mask {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.55); z-index: 9999;
+    justify-content: center; align-items: center;
+  }
+  .preview-mask.show { display: flex; }
+  .preview-paper {
+    background: #fff; box-shadow: 0 6px 30px rgba(0,0,0,.35);
+    position: relative;
+  }
+  .preview-paper iframe { border: none; display: block; }
+  .preview-close {
+    position: absolute; top: 6px; right: 12px;
+    font-size: 20px; color: #999; cursor: pointer; z-index: 10;
+    font-family: sans-serif;
+  }
+  .preview-close:hover { color: #333; }
+
+  /* 打印时：隐藏背景+按钮，输入框透明只显示文字 */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .voucher-stage { transform: none; margin: 0; }
+    .voucher { box-shadow: none; width: 239mm; height: 117mm; page-break-after: avoid; }
+    .voucher .bg, .bank-btn, .btn-bar, .preview-mask { display: none !important; }
+    .voucher input, .voucher select {
+      background: transparent !important; color: #000 !important;
+      box-shadow: none !important; border: none !important;
+      font-size: 14px !important; height: 4mm !important;
+    }
+    .voucher input:focus, .voucher select:focus { box-shadow: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="voucher-stage">
+<div class="voucher" id="voucher">
+  <img class="bg" src="报销凭证1.png" alt="">
+
+  <input type="text" id="certNo" maxlength="12">
+  <input type="number" id="attachCount" min="0">
+  <input type="text" id="unitName" maxlength="20">
+  <input type="text" id="year" maxlength="4">
+  <input type="text" id="month" maxlength="2">
+  <input type="text" id="day" maxlength="2">
+
+  <input type="text" class="r1-sum left" maxlength="8">
+  <input type="text" class="r1-s1" maxlength="4"><input type="text" class="r1-s2" maxlength="4">
+  <input type="text" class="r1-s3" maxlength="4"><input type="text" class="r1-s4" maxlength="4">
+  <input type="text" class="r1-in amt-in" maxlength="8" inputmode="numeric">
+  <input type="text" class="r1-out amt-out" maxlength="8" inputmode="numeric">
+
+  <input type="text" class="r2-sum left" maxlength="8">
+  <input type="text" class="r2-s1" maxlength="4"><input type="text" class="r2-s2" maxlength="4">
+  <input type="text" class="r2-s3" maxlength="4"><input type="text" class="r2-s4" maxlength="4">
+  <input type="text" class="r2-in amt-in" maxlength="8" inputmode="numeric">
+  <input type="text" class="r2-out amt-out" maxlength="8" inputmode="numeric">
+
+  <input type="text" class="r3-sum left" maxlength="8">
+  <input type="text" class="r3-s1" maxlength="4"><input type="text" class="r3-s2" maxlength="4">
+  <input type="text" class="r3-s3" maxlength="4"><input type="text" class="r3-s4" maxlength="4">
+  <input type="text" class="r3-in amt-in" maxlength="8" inputmode="numeric">
+  <input type="text" class="r3-out amt-out" maxlength="8" inputmode="numeric">
+
+  <input type="text" id="bankName" maxlength="16" class="left">
+  <input type="text" id="bankBranch" maxlength="16" class="left">
+  <input type="text" id="bankAccount" maxlength="20" inputmode="numeric" class="left">
+  <span class="bank-btn" onclick="toggleBankDD()">▾ 常用</span>
+  <span class="bank-btn" style="left:116mm;top:80.2mm;" onclick="saveBankManual()">保存</span>
+  <div class="bank-dd" id="bankDD"><div style="padding:4px 8px;color:#999;">暂无保存</div></div>
+
+  <select id="cap_qw"></select><select id="cap_bw"></select><select id="cap_sw"></select>
+  <select id="cap_w"></select><select id="cap_q"></select><select id="cap_b"></select>
+  <select id="cap_s"></select><select id="cap_y"></select><select id="cap_j"></select>
+  <select id="cap_f"></select>
+
+  <input type="text" id="signFinance" maxlength="8">
+  <input type="text" id="signReporter" maxlength="8">
+  <input type="text" id="signCashier" maxlength="8">
+  <input type="text" id="signPayee" maxlength="8">
+</div>
+</div>
+
+<div class="btn-bar">
+  <button class="btn btn-preview" onclick="doPreview()">打印预览</button>
+  <button class="btn btn-print" onclick="doPrint()">直接打印</button>
+  <button class="btn btn-clear" onclick="doClear()">清空</button>
+</div>
+
+<div class="preview-mask" id="previewMask" onclick="if(event.target===this)closePreview()">
+  <div class="preview-paper" id="previewPaper"></div>
+</div>
+
+<script>
+const CAP_OPTS = ["", "￥", "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
+const CIDS = ["cap_qw","cap_bw","cap_sw","cap_w","cap_q","cap_b","cap_s","cap_y","cap_j","cap_f"];
+CIDS.forEach(id => { const s = document.getElementById(id); CAP_OPTS.forEach(o => s.add(new Option(o, o))); });
+
+// 自动填充日期
+document.addEventListener("DOMContentLoaded", function(){
+  const now = new Date();
+  document.getElementById('year').value = now.getFullYear();
+  document.getElementById('month').value = String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('day').value = String(now.getDate()).padStart(2,'0');
+});
+
+const CN = ["零","壹","贰","叁","肆","伍","陆","柒","捌","玖"];
+
+function getInTotal() {
+  let t = 0;
+  document.querySelectorAll(".amt-in").forEach(inp => { const v = parseFloat(inp.value); if (!isNaN(v)) t += v; });
+  return t;
+}
+function getOutTotal() {
+  let t = 0;
+  document.querySelectorAll(".amt-out").forEach(inp => { const v = parseFloat(inp.value); if (!isNaN(v)) t += v; });
+  return t;
+}
+
+function toCN(n) {
+  if (isNaN(n) || n <= 0) return "";
+  const s = n.toFixed(2); const [is, ds] = s.split(".");
+  const y = parseInt(is), j = parseInt(ds[0]), f = parseInt(ds[1]);
+  let r = "";
+  if (y === 0) r = "零";
+  else {
+    const d = is.split("").map(Number), len = d.length;
+    const u = ["", "拾", "佰", "仟"], b = ["", "万", "亿"];
+    let z = false;
+    for (let i = 0; i < len; i++) {
+      const p = len - i - 1, ui = p % 4, bi = Math.floor(p / 4);
+      if (d[i] === 0) z = true;
+      else { if (z) { r += "零"; z = false; } r += CN[d[i]] + u[ui]; }
+      if (ui === 0 && bi > 0 && d.slice(Math.max(0, i - 3), i + 1).some(x => x !== 0)) { r += b[bi]; z = false; }
+    }
+  }
+  r += "元";
+  if (j === 0 && f === 0) r += "整"; else { if (j > 0) r += CN[j] + "角"; if (f > 0) r += CN[f] + "分"; }
+  return r;
+}
+
+function fillCap(n) {
+  if (isNaN(n) || n <= 0) { CIDS.forEach(id => document.getElementById(id).value = ""); return; }
+  const [is, ds] = n.toFixed(2).split(".");
+  const d = is.padStart(8, " ").split("");
+  const m = { cap_qw:0, cap_bw:1, cap_sw:2, cap_w:3, cap_q:4, cap_b:5, cap_s:6, cap_y:7 };
+  Object.entries(m).forEach(([id, idx]) => {
+    const ch = d[idx].trim();
+    document.getElementById(id).value = ch ? CN[parseInt(ch)] : "";
+  });
+  document.getElementById("cap_j").value = ds[0] !== "0" ? CN[parseInt(ds[0])] : "";
+  document.getElementById("cap_f").value = ds[1] !== "0" ? CN[parseInt(ds[1])] : "";
+}
+
+document.querySelectorAll(".amt-in,.amt-out").forEach(inp => inp.addEventListener("input", function() {
+  const clean = this.value.replace(/[^\d.]/g, "");
+  if (clean !== this.value) this.value = clean;
+  const inTotal = getInTotal();
+  const outTotal = getOutTotal();
+  if (inTotal > 0 && outTotal > 0) {
+    alert("收方和付方不能同时录入");
+    this.value = "";
+    return fillCap(0);
+  }
+  fillCap(inTotal > 0 ? inTotal : outTotal);
+}));
+
+// 银行联动
+const BK = "vch_banks_v2";
+function ld() { try { return JSON.parse(localStorage.getItem(BK)) || []; } catch { return []; } }
+function sv(l) { localStorage.setItem(BK, JSON.stringify(l)); }
+function saveBank() {
+  const n = document.getElementById("bankName").value.trim();
+  const b = document.getElementById("bankBranch").value.trim();
+  const a = document.getElementById("bankAccount").value.trim();
+  if (!n && !b && !a) return;
+  let list = ld();
+  const ei = list.findIndex(x => x.n === n && x.b === b && x.a === a);
+  if (ei >= 0) list.splice(ei, 1);
+  list.unshift({ n, b, a });
+  if (list.length > 20) list = list.slice(0, 20);
+  sv(list); renderBankDD();
+}
+function renderBankDD() {
+  const dd = document.getElementById("bankDD"), list = ld();
+  dd.innerHTML = list.length === 0 ? '<div style="padding:4px 8px;color:#999;">暂无保存</div>' : "";
+  list.forEach((x, i) => {
+    const div = document.createElement("div"); div.className = "item";
+    div.innerHTML = `<span style="flex:1;">${x.n||"—"} | ${x.b||"—"} | ${x.a||"—"}</span><span class="del">✕</span>`;
+    div.querySelector("span:first-child").onclick = () => {
+      document.getElementById("bankName").value = x.n;
+      document.getElementById("bankBranch").value = x.b;
+      document.getElementById("bankAccount").value = x.a;
+      dd.style.display = "none";
+    };
+    div.querySelector(".del").onclick = e => { e.stopPropagation(); let l = ld(); l.splice(i, 1); sv(l); renderBankDD(); };
+    dd.appendChild(div);
+  });
+}
+function saveBankManual() {
+  saveBank();
+  renderBankDD();
+  // 简单反馈
+  const btn = document.querySelector('.bank-btn[onclick="saveBankManual()"]');
+  const orig = btn.textContent;
+  btn.textContent = "已保存";
+  btn.style.color = "#52c41a";
+  btn.style.borderColor = "#52c41a";
+  setTimeout(() => { btn.textContent = orig; btn.style.color = "#1677ff"; btn.style.borderColor = "#1677ff"; }, 1000);
+}
+
+function toggleBankDD() {
+  const dd = document.getElementById("bankDD"); renderBankDD();
+  dd.style.display = dd.style.display === "block" ? "none" : "block";
+}
+["bankName","bankBranch","bankAccount"].forEach(id => document.getElementById(id).addEventListener("blur", saveBank));
+document.addEventListener("click", e => {
+  if (!e.target.closest(".bank-btn") && !e.target.closest(".bank-dd"))
+    document.getElementById("bankDD").style.display = "none";
+});
+renderBankDD();
+
+// ========== 生成与录入界面一致的打印HTML ==========
+function collect() {
+  const e = id => document.getElementById(id)?.value || "";
+  const rows = [];
+  ["r1","r2","r3"].forEach(r => rows.push({
+    summary: document.querySelector(`.${r}-sum`)?.value || "",
+    s1: document.querySelector(`.${r}-s1`)?.value || "",
+    s2: document.querySelector(`.${r}-s2`)?.value || "",
+    s3: document.querySelector(`.${r}-s3`)?.value || "",
+    s4: document.querySelector(`.${r}-s4`)?.value || "",
+    amtIn: document.querySelector(`.${r}-in`)?.value || "",
+    amtOut: document.querySelector(`.${r}-out`)?.value || "",
+  }));
+  return {
+    certNo: e("certNo"), attach: e("attachCount"),
+    unit: e("unitName"), year: e("year"), month: e("month"), day: e("day"),
+    bName: e("bankName"), bBranch: e("bankBranch"), bAcc: e("bankAccount"),
+    totalCN: toCN(getInTotal() || getOutTotal()),
+    sFinance: e("signFinance"), sReporter: e("signReporter"),
+    sCashier: e("signCashier"), sPayee: e("signPayee"),
+    caps: CIDS.map(id => document.getElementById(id).value),
+    rows,
+  };
+}
+
+// 生成打印/预览HTML：与录入界面布局完全一致
+function genPrintHTML(d) {
+  // 生成每个span（用span替代input显示文字，坐标相同）
+  function t(id, cls, val) {
+    const el = document.getElementById(id);
+    if (!el) return "";
+    const style = window.getComputedStyle(el);
+    return `<span style="position:absolute;left:${style.left};top:${style.top};
+      width:${style.width};height:4mm;font-size:13px;font-family:SimSun,宋体,serif;
+      text-align:center;color:#000;overflow:hidden;white-space:nowrap;
+      ${cls.includes('left')?'text-align:left;padding-left:1mm;':''}">${val||""}</span>`;
+  }
+
+  // 表格行
+  const rowSpans = [];
+  ["r1","r2","r3"].forEach(r => {
+    const els = ["sum","s1","s2","s3","s4","in","out"];
+    els.forEach(col => {
+      const el = document.querySelector(`.${r}-${col}`);
+      if (el) {
+        const s = window.getComputedStyle(el);
+        const v = el.value || "";
+        rowSpans.push(`<span style="position:absolute;left:${s.left};top:${s.top};
+          width:${s.width};height:4mm;font-size:13px;font-family:SimSun,宋体,serif;
+          text-align:center;color:#000;overflow:hidden;white-space:nowrap;
+          ${col==='sum'?'text-align:left;padding-left:1mm;':''}">${v}</span>`);
+      }
+    });
+  });
+
+  // 大写下拉
+  const capSpans = CIDS.map((id, i) => {
+    const el = document.getElementById(id);
+    const s = el ? window.getComputedStyle(el) : { left: "0", top: "0", width: "0" };
+    return `<span style="position:absolute;left:${s.left};top:${s.top};
+      width:${s.width};height:4mm;font-size:13px;font-family:SimSun,宋体,serif;
+      text-align:center;color:#000;">${d.caps[i]||""}</span>`;
+  }).join("");
+
+  const bgImg = document.querySelector('.voucher .bg');
+  const bgSrc = bgImg ? bgImg.src : '';
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>报账凭证-打印</title>
+<style>
+  @page { size: 239mm 117mm; margin: 0; }
+  body { margin:0; padding:0; }
+  .page { width:239mm; height:117mm; position:relative; background:#fff; overflow:hidden; }
+  .bg { position:absolute; inset:0; width:100%; height:100%; object-fit:fill;
+        pointer-events:none; opacity:0.12; z-index:0; }
+  .txt { position:absolute; z-index:1; font-family:SimSun,宋体,serif; font-size:13px;
+         color:#000; text-align:center; overflow:hidden; white-space:nowrap; }
+</style></head><body>
+<div class="page">
+  <img class="bg" src="${bgSrc}" alt="">
+  ${t("certNo","",d.certNo)}
+  ${t("attachCount","",d.attach)}
+  ${t("unitName","",d.unit)}
+  ${t("year","",d.year)}
+  ${t("month","",d.month)}
+  ${t("day","",d.day)}
+  ${rowSpans.join("")}
+  ${t("bankName","left",d.bName)}
+  ${t("bankBranch","left",d.bBranch)}
+  ${t("bankAccount","left",d.bAcc)}
+  ${capSpans}
+  ${t("signFinance","",d.sFinance)}
+  ${t("signReporter","",d.sReporter)}
+  ${t("signCashier","",d.sCashier)}
+  ${t("signPayee","",d.sPayee)}
+</div>
+</body></html>`;
+}
+
+function doPreview() {
+  const d = collect(), html = genPrintHTML(d);
+  const mask = document.getElementById("previewMask"), paper = document.getElementById("previewPaper");
+  paper.innerHTML = '<span class="preview-close" onclick="closePreview()">✕</span>';
+  const iframe = document.createElement("iframe");
+  iframe.srcdoc = html;
+  iframe.style.cssText = "width:239mm;height:117mm;border:none;display:block;transform-origin:0 0;";
+  const sc = Math.min((window.innerWidth - 80) / (239 * 3.78), (window.innerHeight - 80) / (117 * 3.78));
+  iframe.style.transform = `scale(${sc})`;
+  paper.style.width = (239 * 3.78 * sc) + "px";
+  paper.style.height = (117 * 3.78 * sc + 30) + "px";
+  paper.appendChild(iframe);
+  mask.classList.add("show");
+}
+function closePreview() { document.getElementById("previewMask").classList.remove("show"); }
+
+function doPrint() {
+  const d = collect(), html = genPrintHTML(d);
+  const w = window.open("", "_blank", "width=960,height=500");
+  w.document.write(html); w.document.close(); w.focus();
+  setTimeout(() => { w.print(); }, 500);
+}
+
+function doClear() {
+  if (!confirm("确定清空所有内容？")) return;
+  document.querySelectorAll(".voucher input").forEach(i => i.value = "");
+  CIDS.forEach(id => document.getElementById(id).value = "");
+}
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePreview(); });
+</script>
+</body>
+</html>

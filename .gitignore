@@ -1,0 +1,23 @@
+# 压缩包归档
+*.7z
+*.zip
+*.rar
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+
+# 临时文件
+*.tmp
+*.temp
