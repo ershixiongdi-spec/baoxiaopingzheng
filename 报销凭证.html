@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>报账凭证</title>
+<title>报销凭证</title>
 <style>
   @page { size: 239mm 117mm; margin: 0; }
 
@@ -16,7 +16,7 @@
     min-height: 100vh;
   }
 
-  /* 外层缩放容器（仅屏幕） */
+  /* 外层缩放容器（仅屏幕）*/
   .voucher-stage {
     transform: scale(1.20);
     transform-origin: top center;
@@ -49,7 +49,7 @@
     background: rgba(200,200,200,0.35);
     transition: background 0.12s;
     font-size: 11px;         /* 放大 */
-    height: 3.8mm;           /* 放大（原2.5mm） */
+    height: 3.8mm;           /* 放大（原2.5mm）*/
   }
   .voucher input:focus, .voucher select:focus {
     background: rgba(80,160,255,0.40);
@@ -65,16 +65,16 @@
     text-align: center; overflow: hidden;
     white-space: nowrap;
     pointer-events: none;
-    display: none;           /* 录入时隐藏 */
+    display: none;           /* 录入时隐藏*/
   }
 
   /* =============================================
-     坐标 (mm) = px * 239/2823 (及 y: px * 117/1382)
+     坐标 (mm) = px * 239/2823（或 y: px * 117/1382）
      ============================================= */
 
   #certNo      { left:203.2mm; top:17.4mm; width:8.4mm; }
   #attachCount { left:204.8mm; top:26.8mm; width:5.1mm; }
-  #unitName    { left:41.6mm; top:25.8mm; width:25.4mm; }
+  #unitName    { left:41.6mm; top:23.8mm; width:25.4mm; }
   #year        { left:90.2mm; top:26.3mm; width:7.1mm; }
   #month       { left:107.1mm;top:26.3mm; width:3.7mm; }
   #day         { left:123.5mm;top:26.3mm; width:3.7mm; }
@@ -103,9 +103,9 @@
   .r3-in  {left:175.1mm;top:71.1mm; width:19.2mm;}
   .r3-out {left:198.8mm;top:71.1mm; width:19.2mm;}
 
-  #bankName    { left:48.0mm; top:80.2mm; width:42.3mm; }
-  #bankBranch  { left:47.9mm; top:85.5mm; width:42.3mm; }
-  #bankAccount { left:47.8mm; top:90.9mm; width:42.3mm; }
+  #bankName    { left:48.0mm; top:78.2mm; width:42.3mm; }
+  #bankBranch  { left:47.9mm; top:83.5mm; width:42.3mm; }
+  #bankAccount { left:47.8mm; top:88.9mm; width:42.3mm; }
 
   #cap_qw { left:55.0mm; top:99.9mm; width:6.8mm; }
   #cap_bw { left:71.7mm; top:99.9mm; width:6.8mm; }
@@ -119,7 +119,7 @@
   #cap_f  { left:205.4mm;top:100.1mm;width:6.8mm; }
 
   #signFinance  { left:47.0mm; top:109.3mm; width:17mm; }
-  #signReporter { left:87.8mm; top:109.3mm; width:12.7mm; }
+  #signReporter { left:87.8mm; top:108.3mm; width:12.7mm; }
   #signCashier  { left:140mm;  top:109.3mm; width:17mm; }
   #signPayee    { left:195mm;  top:109.3mm; width:17mm; }
 
@@ -183,7 +183,7 @@
   }
   .preview-close:hover { color: #333; }
 
-  /* 打印时：隐藏背景+按钮，输入框透明只显示文字 */
+  /* 打印时：隐藏背景+按钮，输入框透明只显示文字*/
   @media print {
     body { background: #fff; padding: 0; }
     .voucher-stage { transform: none; margin: 0; }
@@ -232,7 +232,7 @@
   <input type="text" id="bankName" maxlength="16" class="left">
   <input type="text" id="bankBranch" maxlength="16" class="left">
   <input type="text" id="bankAccount" maxlength="20" inputmode="numeric" class="left">
-  <span class="bank-btn" onclick="toggleBankDD()">▾ 常用</span>
+  <span class="bank-btn" onclick="toggleBankDD()">▼常用</span>
   <span class="bank-btn" style="left:116mm;top:80.2mm;" onclick="saveBankManual()">保存</span>
   <div class="bank-dd" id="bankDD"><div style="padding:4px 8px;color:#999;">暂无保存</div></div>
 
@@ -259,17 +259,17 @@
 </div>
 
 <script>
-const CAP_OPTS = ["", "￥", "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
+const CAP_OPTS = ["", "¥", "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
 const CIDS = ["cap_qw","cap_bw","cap_sw","cap_w","cap_q","cap_b","cap_s","cap_y","cap_j","cap_f"];
 CIDS.forEach(id => { const s = document.getElementById(id); CAP_OPTS.forEach(o => s.add(new Option(o, o))); });
 
-// 自动填充日期
-document.addEventListener("DOMContentLoaded", function(){
+// 自动填充日期（立即执行，script 在 body 末尾 DOM 已就绪）
+(function initDate() {
   const now = new Date();
   document.getElementById('year').value = now.getFullYear();
   document.getElementById('month').value = String(now.getMonth()+1).padStart(2,'0');
   document.getElementById('day').value = String(now.getDate()).padStart(2,'0');
-});
+})();
 
 const CN = ["零","壹","贰","叁","肆","伍","陆","柒","捌","玖"];
 
@@ -353,7 +353,7 @@ function renderBankDD() {
   dd.innerHTML = list.length === 0 ? '<div style="padding:4px 8px;color:#999;">暂无保存</div>' : "";
   list.forEach((x, i) => {
     const div = document.createElement("div"); div.className = "item";
-    div.innerHTML = `<span style="flex:1;">${x.n||"—"} | ${x.b||"—"} | ${x.a||"—"}</span><span class="del">✕</span>`;
+    div.innerHTML = '<span style="flex:1;">' + (x.n||"—") + ' | ' + (x.b||"—") + ' | ' + (x.a||"—") + '</span><span class="del">✕</span>';
     div.querySelector("span:first-child").onclick = () => {
       document.getElementById("bankName").value = x.n;
       document.getElementById("bankBranch").value = x.b;
@@ -367,7 +367,6 @@ function renderBankDD() {
 function saveBankManual() {
   saveBank();
   renderBankDD();
-  // 简单反馈
   const btn = document.querySelector('.bank-btn[onclick="saveBankManual()"]');
   const orig = btn.textContent;
   btn.textContent = "已保存";
@@ -392,13 +391,13 @@ function collect() {
   const e = id => document.getElementById(id)?.value || "";
   const rows = [];
   ["r1","r2","r3"].forEach(r => rows.push({
-    summary: document.querySelector(`.${r}-sum`)?.value || "",
-    s1: document.querySelector(`.${r}-s1`)?.value || "",
-    s2: document.querySelector(`.${r}-s2`)?.value || "",
-    s3: document.querySelector(`.${r}-s3`)?.value || "",
-    s4: document.querySelector(`.${r}-s4`)?.value || "",
-    amtIn: document.querySelector(`.${r}-in`)?.value || "",
-    amtOut: document.querySelector(`.${r}-out`)?.value || "",
+    summary: document.querySelector('.' + r + '-sum')?.value || "",
+    s1: document.querySelector('.' + r + '-s1')?.value || "",
+    s2: document.querySelector('.' + r + '-s2')?.value || "",
+    s3: document.querySelector('.' + r + '-s3')?.value || "",
+    s4: document.querySelector('.' + r + '-s4')?.value || "",
+    amtIn: document.querySelector('.' + r + '-in')?.value || "",
+    amtOut: document.querySelector('.' + r + '-out')?.value || "",
   }));
   return {
     certNo: e("certNo"), attach: e("attachCount"),
@@ -414,75 +413,72 @@ function collect() {
 
 // 生成打印/预览HTML：与录入界面布局完全一致
 function genPrintHTML(d) {
-  // 生成每个span（用span替代input显示文字，坐标相同）
   function t(id, cls, val) {
     const el = document.getElementById(id);
     if (!el) return "";
     const style = window.getComputedStyle(el);
-    return `<span style="position:absolute;left:${style.left};top:${style.top};
-      width:${style.width};height:4mm;font-size:13px;font-family:SimSun,宋体,serif;
-      text-align:center;color:#000;overflow:hidden;white-space:nowrap;
-      ${cls.includes('left')?'text-align:left;padding-left:1mm;':''}">${val||""}</span>`;
+    return '<span style="position:absolute;left:' + style.left + ';top:' + style.top + ';'
+      + 'width:' + style.width + ';height:4mm;font-size:13px;font-family:SimSun,宋体,serif;'
+      + 'text-align:center;color:#000;overflow:hidden;white-space:nowrap;'
+      + (cls.includes('left')?'text-align:left;padding-left:1mm;':'') + '">' + (val||"") + '</span>';
   }
 
-  // 表格行
   const rowSpans = [];
   ["r1","r2","r3"].forEach(r => {
     const els = ["sum","s1","s2","s3","s4","in","out"];
     els.forEach(col => {
-      const el = document.querySelector(`.${r}-${col}`);
+      const el = document.querySelector('.' + r + '-' + col);
       if (el) {
         const s = window.getComputedStyle(el);
         const v = el.value || "";
-        rowSpans.push(`<span style="position:absolute;left:${s.left};top:${s.top};
-          width:${s.width};height:4mm;font-size:13px;font-family:SimSun,宋体,serif;
-          text-align:center;color:#000;overflow:hidden;white-space:nowrap;
-          ${col==='sum'?'text-align:left;padding-left:1mm;':''}">${v}</span>`);
+        rowSpans.push('<span style="position:absolute;left:' + s.left + ';top:' + s.top + ';'
+          + 'width:' + s.width + ';height:4mm;font-size:13px;font-family:SimSun,宋体,serif;'
+          + 'text-align:center;color:#000;overflow:hidden;white-space:nowrap;'
+          + (col==='sum'?'text-align:left;padding-left:1mm;':'') + '">' + v + '</span>');
       }
     });
   });
 
-  // 大写下拉
   const capSpans = CIDS.map((id, i) => {
     const el = document.getElementById(id);
     const s = el ? window.getComputedStyle(el) : { left: "0", top: "0", width: "0" };
-    return `<span style="position:absolute;left:${s.left};top:${s.top};
-      width:${s.width};height:4mm;font-size:13px;font-family:SimSun,宋体,serif;
-      text-align:center;color:#000;">${d.caps[i]||""}</span>`;
+    return '<span style="position:absolute;left:' + s.left + ';top:' + s.top + ';'
+      + 'width:' + s.width + ';height:4mm;font-size:13px;font-family:SimSun,宋体,serif;'
+      + 'text-align:center;color:#000;">' + (d.caps[i]||"") + '</span>';
   }).join("");
 
   const bgImg = document.querySelector('.voucher .bg');
   const bgSrc = bgImg ? bgImg.src : '';
 
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>报账凭证-打印</title>
-<style>
-  @page { size: 239mm 117mm; margin: 0; }
-  body { margin:0; padding:0; }
-  .page { width:239mm; height:117mm; position:relative; background:#fff; overflow:hidden; }
-  .bg { position:absolute; inset:0; width:100%; height:100%; object-fit:fill;
-        pointer-events:none; opacity:0.12; z-index:0; }
-  .txt { position:absolute; z-index:1; font-family:SimSun,宋体,serif; font-size:13px;
-         color:#000; text-align:center; overflow:hidden; white-space:nowrap; }
-</style></head><body>
-<div class="page">
-  <img class="bg" src="${bgSrc}" alt="">
-  ${t("certNo","",d.certNo)}
-  ${t("attachCount","",d.attach)}
-  ${t("unitName","",d.unit)}
-  ${t("year","",d.year)}
-  ${t("month","",d.month)}
-  ${t("day","",d.day)}
-  ${rowSpans.join("")}
-  ${t("bankName","left",d.bName)}
-  ${t("bankBranch","left",d.bBranch)}
-  ${t("bankAccount","left",d.bAcc)}
-  ${capSpans}
-  ${t("signFinance","",d.sFinance)}
-  ${t("signReporter","",d.sReporter)}
-  ${t("signCashier","",d.sCashier)}
-  ${t("signPayee","",d.sPayee)}
-</div>
-</body></html>`;
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>报销凭证-打印</title>\n'
++ '<style>\n'
++ '  @page { size: 239mm 117mm; margin: 0; }\n'
++ '  body { margin:0; padding:0; }\n'
++ '  .page { width:239mm; height:117mm; position:relative; background:#fff; overflow:hidden; }\n'
++ '  .bg { position:absolute; inset:0; width:100%; height:100%; object-fit:fill;\n'
++ '        pointer-events:none; opacity:0.12; z-index:0; }\n'
++ '  .txt { position:absolute; z-index:1; font-family:SimSun,宋体,serif; font-size:13px;\n'
++ '         color:#000; text-align:center; overflow:hidden; white-space:nowrap; }\n'
++ '</style></head><body>\n'
++ '<div class="page">\n'
++ '  <img class="bg" src="' + bgSrc + '" alt="">\n'
++ '  ' + t("certNo","",d.certNo) + '\n'
++ '  ' + t("attachCount","",d.attach) + '\n'
++ '  ' + t("unitName","",d.unit) + '\n'
++ '  ' + t("year","",d.year) + '\n'
++ '  ' + t("month","",d.month) + '\n'
++ '  ' + t("day","",d.day) + '\n'
++ '  ' + rowSpans.join("\n  ") + '\n'
++ '  ' + t("bankName","left",d.bName) + '\n'
++ '  ' + t("bankBranch","left",d.bBranch) + '\n'
++ '  ' + t("bankAccount","left",d.bAcc) + '\n'
++ '  ' + capSpans + '\n'
++ '  ' + t("signFinance","",d.sFinance) + '\n'
++ '  ' + t("signReporter","",d.sReporter) + '\n'
++ '  ' + t("signCashier","",d.sCashier) + '\n'
++ '  ' + t("signPayee","",d.sPayee) + '\n'
++ '</div>\n'
++ '</body></html>';
 }
 
 function doPreview() {
@@ -493,7 +489,7 @@ function doPreview() {
   iframe.srcdoc = html;
   iframe.style.cssText = "width:239mm;height:117mm;border:none;display:block;transform-origin:0 0;";
   const sc = Math.min((window.innerWidth - 80) / (239 * 3.78), (window.innerHeight - 80) / (117 * 3.78));
-  iframe.style.transform = `scale(${sc})`;
+  iframe.style.transform = 'scale(' + sc + ')';
   paper.style.width = (239 * 3.78 * sc) + "px";
   paper.style.height = (117 * 3.78 * sc + 30) + "px";
   paper.appendChild(iframe);
