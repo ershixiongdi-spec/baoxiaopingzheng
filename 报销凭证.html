@@ -41,7 +41,7 @@
   }
 
   /* ---- 输入控件 ---- */
-  .voucher input, .voucher select {
+  .voucher input, .voucher select, .voucher textarea {
     position: absolute; border: none; outline: none;
     font-family: "SimSun","宋体",serif;
     text-align: center; color: #111; padding: 0;
@@ -51,7 +51,12 @@
     font-size: 11px;         /* 放大 */
     height: 3.8mm;           /* 放大（原2.5mm）*/
   }
-  .voucher input:focus, .voucher select:focus {
+  .voucher textarea {
+    resize: none; overflow-y: auto;
+    line-height: 3.8mm; white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .voucher input:focus, .voucher select:focus, .voucher textarea:focus {
     background: rgba(80,160,255,0.40);
     box-shadow: 0 0 0 1.5px #1677ff;
   }
@@ -74,36 +79,36 @@
 
   #certNo      { left:203.2mm; top:17.4mm; width:8.4mm; }
   #attachCount { left:204.8mm; top:26.8mm; width:5.1mm; }
-  #unitName    { left:41.6mm; top:26.3mm; width:25.4mm; }
+  #unitName    { left:41.6mm; top:26.3mm; width:38.4mm; font-size:7px; }
   #year        { left:90.2mm; top:26.3mm; width:7.1mm; }
   #month       { left:107.1mm;top:26.3mm; width:3.7mm; }
   #day         { left:123.5mm;top:26.3mm; width:3.7mm; }
 
-  .r1-sum {left:25.0mm; top:53.1mm; width:29.4mm;}
+  .r1-sum {left:16.0mm; top:53.1mm; width:47.4mm; height:11.4mm;}
   .r1-s1  {left:76.3mm; top:53.1mm; width:15.2mm;}
   .r1-s2  {left:100.6mm;top:53.5mm; width:15.2mm;}
   .r1-s3  {left:125.9mm;top:53.8mm; width:15.2mm;}
   .r1-s4  {left:150.9mm;top:54.2mm; width:15.2mm;}
-  .r1-in  {left:174.9mm;top:53.9mm; width:19.2mm;}
-  .r1-out {left:198.8mm;top:53.5mm; width:19.2mm;}
+  .r1-in  {left:170.4mm;top:53.9mm; width:29mm;}
+  .r1-out {left:195.1mm;top:53.5mm; width:29mm;}
 
-  .r2-sum {left:25.0mm; top:62.8mm; width:29.4mm;}
+  .r2-sum {left:16.0mm; top:62.8mm; width:47.4mm; height:11.4mm;}
   .r2-s1  {left:76.4mm; top:63.0mm; width:15.2mm;}
   .r2-s2  {left:100.9mm;top:62.7mm; width:15.2mm;}
   .r2-s3  {left:126.0mm;top:62.2mm; width:15.2mm;}
   .r2-s4  {left:151.2mm;top:62.2mm; width:15.2mm;}
-  .r2-in  {left:174.9mm;top:62.5mm; width:19.2mm;}
-  .r2-out {left:198.8mm;top:62.4mm; width:19.2mm;}
+  .r2-in  {left:170.4mm;top:62.5mm; width:29mm;}
+  .r2-out {left:195.1mm;top:62.4mm; width:29mm;}
 
-  .r3-sum {left:25.1mm; top:72.0mm; width:29.4mm;}
+  .r3-sum {left:16.1mm; top:72.0mm; width:47.4mm; height:11.4mm;}
   .r3-s1  {left:76.3mm; top:72.0mm; width:15.2mm;}
   .r3-s2  {left:101.0mm;top:71.5mm; width:15.2mm;}
   .r3-s3  {left:126.3mm;top:71.7mm; width:15.2mm;}
   .r3-s4  {left:151.4mm;top:71.2mm; width:15.2mm;}
-  .r3-in  {left:175.1mm;top:71.1mm; width:19.2mm;}
-  .r3-out {left:198.8mm;top:71.1mm; width:19.2mm;}
+  .r3-in  {left:170.6mm;top:71.1mm; width:29mm;}
+  .r3-out {left:195.3mm;top:71.1mm; width:29mm;}
 
-  #bankName    { left:48.0mm; top:78.2mm; width:42.3mm; }
+  #bankName    { left:48.0mm; top:78.2mm; width:79mm; }
   #bankBranch  { left:47.9mm; top:83.5mm; width:42.3mm; }
   #bankAccount { left:47.8mm; top:88.9mm; width:42.3mm; }
 
@@ -125,7 +130,7 @@
 
   /* 银行按钮 */
   .bank-btn {
-    position: absolute; left: 93mm; top: 80.2mm;
+    position: absolute; left: 130mm; top: 80.2mm;
     font-size: 8px; color: #1677ff; cursor: pointer; z-index: 10;
     background: rgba(255,255,255,0.85); border: 1px solid #1677ff;
     border-radius: 2px; padding: 0 4px; height: 3.8mm; line-height: 3.8mm;
@@ -189,12 +194,13 @@
     .voucher-stage { transform: none; margin: 0; }
     .voucher { box-shadow: none; width: 239mm; height: 117mm; page-break-after: avoid; }
     .voucher .bg, .bank-btn, .btn-bar, .preview-mask { display: none !important; }
-    .voucher input, .voucher select {
+    .voucher input, .voucher select, .voucher textarea {
       background: transparent !important; color: #000 !important;
       box-shadow: none !important; border: none !important;
       font-size: 14px !important; height: 4mm !important;
     }
-    .voucher input:focus, .voucher select:focus { box-shadow: none !important; }
+    #unitName { font-size: 8px !important; }
+    .voucher input:focus, .voucher select:focus, .voucher textarea:focus { box-shadow: none !important; }
   }
 </style>
 </head>
@@ -206,34 +212,34 @@
 
   <input type="text" id="certNo" maxlength="12">
   <input type="text" id="attachCount" inputmode="numeric">
-  <input type="text" id="unitName" maxlength="20">
+  <input type="text" id="unitName" maxlength="25">
   <input type="text" id="year" maxlength="4">
   <input type="text" id="month" maxlength="2">
   <input type="text" id="day" maxlength="2">
 
-  <input type="text" class="r1-sum left" maxlength="8">
+  <textarea class="r1-sum"></textarea>
   <input type="text" class="r1-s1" maxlength="4"><input type="text" class="r1-s2" maxlength="4">
   <input type="text" class="r1-s3" maxlength="4"><input type="text" class="r1-s4" maxlength="4">
-  <input type="text" class="r1-in amt-in" maxlength="8" inputmode="numeric">
-  <input type="text" class="r1-out amt-out" maxlength="8" inputmode="numeric">
+  <input type="text" class="r1-in amt-in" maxlength="12" inputmode="numeric" placeholder="0.00">
+  <input type="text" class="r1-out amt-out" maxlength="12" inputmode="numeric" placeholder="0.00">
 
-  <input type="text" class="r2-sum left" maxlength="8">
+  <textarea class="r2-sum"></textarea>
   <input type="text" class="r2-s1" maxlength="4"><input type="text" class="r2-s2" maxlength="4">
   <input type="text" class="r2-s3" maxlength="4"><input type="text" class="r2-s4" maxlength="4">
-  <input type="text" class="r2-in amt-in" maxlength="8" inputmode="numeric">
-  <input type="text" class="r2-out amt-out" maxlength="8" inputmode="numeric">
+  <input type="text" class="r2-in amt-in" maxlength="12" inputmode="numeric" placeholder="0.00">
+  <input type="text" class="r2-out amt-out" maxlength="12" inputmode="numeric" placeholder="0.00">
 
-  <input type="text" class="r3-sum left" maxlength="8">
+  <textarea class="r3-sum"></textarea>
   <input type="text" class="r3-s1" maxlength="4"><input type="text" class="r3-s2" maxlength="4">
   <input type="text" class="r3-s3" maxlength="4"><input type="text" class="r3-s4" maxlength="4">
-  <input type="text" class="r3-in amt-in" maxlength="8" inputmode="numeric">
-  <input type="text" class="r3-out amt-out" maxlength="8" inputmode="numeric">
+  <input type="text" class="r3-in amt-in" maxlength="12" inputmode="numeric" placeholder="0.00">
+  <input type="text" class="r3-out amt-out" maxlength="12" inputmode="numeric" placeholder="0.00">
 
-  <input type="text" id="bankName" maxlength="16" class="left">
+  <input type="text" id="bankName" maxlength="25" class="left">
   <input type="text" id="bankBranch" maxlength="16" class="left">
   <input type="text" id="bankAccount" maxlength="20" inputmode="numeric" class="left">
   <span class="bank-btn" onclick="toggleBankDD()">▼常用</span>
-  <span class="bank-btn" style="left:116mm;top:80.2mm;" onclick="saveBankManual()">保存</span>
+  <span class="bank-btn" style="left:147mm;top:80.2mm;" onclick="saveBankManual()">保存</span>
   <div class="bank-dd" id="bankDD"><div style="padding:4px 8px;color:#999;">暂无保存</div></div>
 
   <select id="cap_qw"></select><select id="cap_bw"></select><select id="cap_sw"></select>
@@ -431,10 +437,12 @@ function genPrintHTML(d) {
       if (el) {
         const s = window.getComputedStyle(el);
         const v = el.value || "";
+        const isSum = col === 'sum';
         rowSpans.push('<span style="position:absolute;left:' + s.left + ';top:' + s.top + ';'
-          + 'width:' + s.width + ';height:4mm;font-size:13px;font-family:SimSun,宋体,serif;'
-          + 'text-align:center;color:#000;overflow:hidden;white-space:nowrap;'
-          + (col==='sum'?'text-align:left;padding-left:1mm;':'') + '">' + v + '</span>');
+          + 'width:' + s.width + ';height:' + (isSum?'11.4mm':'4mm') + ';font-size:13px;font-family:SimSun,宋体,serif;'
+          + 'text-align:center;color:#000;overflow:hidden;'
+          + (isSum?'white-space:pre-wrap;line-height:3.8mm;word-break:break-all;':'white-space:nowrap;')
+          + (col==='sum'?'':'') + '">' + v + '</span>');
       }
     });
   });
@@ -506,7 +514,7 @@ function doPrint() {
 
 function doClear() {
   if (!confirm("确定清空所有内容？")) return;
-  document.querySelectorAll(".voucher input").forEach(i => i.value = "");
+  document.querySelectorAll(".voucher input, .voucher textarea").forEach(i => i.value = "");
   CIDS.forEach(id => document.getElementById(id).value = "");
 }
 
